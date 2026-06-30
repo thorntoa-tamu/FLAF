@@ -187,7 +187,11 @@ def createHistTuple(
                 dfw.colToSave.append(desc["weight"])
 
             print("Defining binned columns")
+            existing_cols = set(str(c) for c in dfw.df.GetColumnNames())
             for var in flatten_vars:
+                if var not in existing_cols:
+                    print(f"Note: column '{var}' not available at HistTuple stage, skipping")
+                    continue
                 dfw.df = dfw.df.Define(f"{var}_bin", f"get_{var}_bin({var})")
                 dfw.colToSave.append(f"{var}_bin")
 

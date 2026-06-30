@@ -55,6 +55,7 @@ namespace analysis {
         double pyInvisible1;
         double pxInvisible2;
         double pyInvisible2;
+        bool balanced;  // false => ben_findsols hit the unbalanced sentinel (no valid neutrino split)
     };
 
     // Returns MT2 plus the invisible momentum splitting that achieves it.
@@ -78,7 +79,11 @@ namespace analysis {
         const double chiB = massHypo2;
         const double mt2 = asymm_mt2_lester_bisect::get_mT2(mVisA, pxA, pyA, mVisB, pxB, pyB, pxMiss, pyMiss, chiA, chiB, 0);
         const auto sol = asymm_mt2_lester_bisect::ben_findsols(mt2, pxA, pyA, mVisA, chiA, pxB, pyB, pxMiss, pyMiss, mVisB, chiB);
-        return {mt2, sol.first, sol.second, pxMiss - sol.first, pyMiss - sol.second};
+        // ben_findsols returns exactly (0,0) only as its "unbalanced" sentinel (no balanced tangent
+        // point exists). A genuine balanced split is recovered from a numerical scan and is never
+        // exactly (0,0), so this is a reliable flag for "no valid neutrino split".
+        const bool balanced = !(sol.first == 0.0 && sol.second == 0.0);
+        return {mt2, sol.first, sol.second, pxMiss - sol.first, pyMiss - sol.second, balanced};
     }
 
 }  // namespace analysis
